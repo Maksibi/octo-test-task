@@ -6,16 +6,12 @@ namespace CodeBase.RefactoredCode
 {
     public class CharactersView : MonoBehaviour
     {
-        //Я бы вообще убрал обновления по кадрам. Для UI в большинстве случаев достаточно событий.
-        // Для разработки это тоже проще
+        //Я убрал обновления по кадрам совсем. Это лишнее при работе с UI в данном случае.
         
         [SerializeField] private List<Transform> _characterTransforms;
         [SerializeField] private TMP_Text _label;
-        [SerializeField] private int _updateEveryNFrames = 1;
 
         private readonly List<Character> _characters = new();
-        private bool _refreshScheduled;
-        private int _framesUntilRefresh;
 
         private void OnEnable()
         {
@@ -27,19 +23,6 @@ namespace CodeBase.RefactoredCode
         {
             UnsubscribeAll();
             _characters.Clear();
-        }
-
-        private void Update()
-        {
-            if (!_refreshScheduled)
-                return;
-
-            _framesUntilRefresh--;
-            if (_framesUntilRefresh > 0)
-                return;
-
-            _refreshScheduled = false;
-            RefreshUI();
         }
 
         private void ResubscribeAll()
@@ -54,13 +37,13 @@ namespace CodeBase.RefactoredCode
         private void Subscribe(Character character)
         {
             character.CharacterChanged += OnCharacterChanged;
-            character.SomeValueChanged += ScheduleRefresh;
+            character.SomeValueChanged += RefreshUI;
         }
 
         private void Unsubscribe(Character character)
         {
             character.CharacterChanged -= OnCharacterChanged;
-            character.SomeValueChanged -= ScheduleRefresh;
+            character.SomeValueChanged -= RefreshUI;
         }
 
         private void UnsubscribeAll()
@@ -75,13 +58,6 @@ namespace CodeBase.RefactoredCode
         private void OnCharacterChanged(Character _)
         {
             ResubscribeAll();
-            ScheduleRefresh();
-        }
-
-        private void ScheduleRefresh()
-        {
-            _refreshScheduled = true;
-            _framesUntilRefresh = _updateEveryNFrames;
         }
 
         private void RebuildCharacterCache()
@@ -101,20 +77,12 @@ namespace CodeBase.RefactoredCode
 
         private void RefreshUI()
         {
-            if (_label == null)
-                return;
-
             float totalValue = 0f;
             int count = 0;
 
             for (int i = _characters.Count - 1; i >= 0; i--)
             {
                 Character character = _characters[i];
-                if (character == null)
-                {
-                    _characters.RemoveAt(i);
-                    continue;
-                }
 
                 totalValue += character.SomeValue;
                 count++;

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using CodeBase.Gameplay.Entities;
+using Object = UnityEngine.Object;
 
 namespace CodeBase.Services
 {
     public class GameplayEntityRegistry
     {
-        //Статика вместо DI
-        public static GameplayEntityRegistry Instance { get; } = new();
-
         private readonly HashSet<IGameplayEntity> _all = new();
         private readonly List<IGameplayEntity> _activeBuffer = new();
         private bool _activeCacheDirty = true;
@@ -64,7 +62,7 @@ namespace CodeBase.Services
 
         private static bool IsEntityValidAndActive(IGameplayEntity entity)
         {
-            if (entity is UnityEngine.Object unityObject && unityObject == null)
+            if (entity is Object unityObject && unityObject == null)
                 return false;
 
             return entity.IsActive;

@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace CodeBase.Services
 {
-    //Регистрация где-то в DI
     public class PopUpFactory
     {
         private readonly Transform _root;

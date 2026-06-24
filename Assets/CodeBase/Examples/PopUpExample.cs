@@ -1,13 +1,26 @@
-﻿using CodeBase.Services;
+﻿using CodeBase.SaveService;
+using CodeBase.Services;
 using CodeBase.UI;
+using Zenject;
 
 namespace CodeBase.Examples
 {
     public class PopUpExample
     {
+        private readonly PopUpService _popUpService;
+        private readonly SaveSystem _saveSystem;
+
+        [Inject]
+        public PopUpExample(PopUpService popUpService, SaveSystem saveSystem)
+        {
+            _popUpService = popUpService;
+            _saveSystem = saveSystem;
+        }
+
         public void ExampleDialogMethod()
         {
-            PopUpService.Instance.OpenDialog(new PopUpDialogData
+            TextPopUp dialogPopUp = new TextPopUp();
+            dialogPopUp = _popUpService.OpenDialog(new PopUpDialogData
             {
                 Title = "Выход",
                 Body = "Сохранить перед выходом?",
@@ -15,27 +28,24 @@ namespace CodeBase.Examples
                 {
                     new PopUpButtonOption("Да", () => OnYes()),
                     new PopUpButtonOption("Нет", () => OnNo()),
-                    new PopUpButtonOption("Отмена", null)
+                    new PopUpButtonOption("Отмена", () => dialogPopUp.Close()),
                 }
             });
         }
 
         public void ExampleSaveMethod()
         {
-            SaveSystem.SaveSystem.Instance.LoadLatestOrNew();
-            SaveSystem.SaveSystem.Instance.SaveData.Money = 100;
-            SaveSystem.SaveSystem.Instance.QuickSaveToStorage();
+            
         }
 
         private void OnNo()
         {
-            // Какой-то смешной комментарий 1
+            // Не сохраняемся и выходим
         }
 
         private void OnYes()
         {
-            // Какой-то смешной комментарий 2
-            SaveSystem.SaveSystem.Instance.QuickSaveToStorage();
+            // Сохраняемся через saveSystem и выходим
         }
     }
 }
